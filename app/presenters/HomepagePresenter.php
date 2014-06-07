@@ -11,10 +11,24 @@ use Nette,
  */
 class HomepagePresenter extends BasePresenter
 {
+	/** @var Nette\Database\Context */
+	private $database;
+
+	public function __construct(Nette\Database\Context $database)
+	{
+		$this->database = $database;
+	}
 
 	public function renderDefault()
 	{
-		$this->template->anyVariable = 'any value';
+		$posts = $this->database->query('select
+			posts.*, count(comments.id) as count_of_comments
+			from posts
+				left join comments on posts.id = comments.post_id
+			group by posts.id
+			order by created_at desc');
+
+		$this->template->posts = $posts;
 	}
 
 }
